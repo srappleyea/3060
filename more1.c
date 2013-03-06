@@ -6,10 +6,12 @@
 #include <termios.h> // Needed for terminal IO
 #include <unistd.h>
 
+#define BUFFER_SIZE (100)
+
 int Set(int);
 int Reset(int);
 
-int main()
+int main(int argc, char* argv[])
 {
 	// Variables for handling input from the terminal
 	int inputdesc; 
@@ -18,6 +20,63 @@ int main()
 	input = fdopen(inputdesc, "r"); // Setting filepointer to the descriptor
 	// Use inputdesc with set/reset to setup terminal input for -echo and nonblocking
 	// Use input as you would any other file to get input chars
+
+
+	char user_input = ' ';
+	char file_contents[BUFFER_SIZE];
+	int line_counter = 0;
+	FILE* fp;
+
+	if(argc > 1){
+		fp = fopen(argv[1], "r");
+
+		if(!fp){
+			perror("There was a problem opening the file.\n");
+			exit(-1);
+		}
+
+		fseek(fp, 0, SEEK_END);
+		double size = ftell(fp);
+		fseek(fp, 0, SEEK_SET);
+
+		while(!feof(fp) && user_input != 'q'){
+			line_counter = 0;
+
+			if(user_input == ' '){
+				while(line_counter < 23 && !feof(fp)){
+					if(fgets(file_contents, BUFFER_SIZE, fp)){
+						printf("%s", file_contents);
+						++line_counter;
+					}
+				}
+			}
+
+			else if(user_input == '\n')
+				if(fgets(file_contents, BUFFER_SIZE, fp))
+					printf("%s", file_contents);
+
+			else
+				printf("Invalid command given");
+
+			printf(argv[1]);
+			printf(": %.2f%% of the file is displayed.\n", (ftell(fp) / size) * 100);
+			user_input = getc(stdin);
+		}
+	}
+
+	//if no file name is given copy stdin to stdout
+	else{
+		printf("Copy stdin to stdout...\n");
+		fp = stdin;
+
+		while(!feof(fp)){
+			if(fgets(file_contents, BUFFER_SIZE, fp)){
+				printf("%s", file_contents);
+				++line_counter;
+			}
+		}
+	}
+
 
 return 0;
 }
@@ -36,9 +95,6 @@ int Set(int inputdesc)
 	
 	if(tcsetattr (inputdesc, TCSANOW, &info) == -1)
 	{ return -1; }
-	
-	if ( info.c_lflag & ECHO)
-   	{ printf("echo flag is set\n"); }
       
     return 0;
 }
