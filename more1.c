@@ -8,17 +8,18 @@
 
 #define BUFFER_SIZE (100)
 
-int Set(int);
-int Reset(int);
+int Set();
+int Reset();
+
+static int inputdesc;
 
 int main(int argc, char* argv[])
 {
 	// Variables for handling input from the terminal
-	int inputdesc; 
+	inputdesc = 0; // 0 being the default for stdin
 	FILE *input;
 	inputdesc = open("/dev/tty", O_RDONLY); // Setting descriptor to the terminal
 	input = fdopen(inputdesc, "r"); // Setting filepointer to the descriptor
-	// Use inputdesc with set/reset to setup terminal input for -echo and nonblocking
 	// Use input as you would any other file to get input chars
 
 
@@ -29,6 +30,8 @@ int main(int argc, char* argv[])
 
 	if(argc > 1){
 		fp = fopen(argv[1], "r");
+
+	Set();
 
 		if(!fp){
 			perror("There was a problem opening the file.\n");
@@ -77,7 +80,7 @@ int main(int argc, char* argv[])
 		}
 	}
 
-
+	Reset();
 return 0;
 }
 
@@ -85,10 +88,9 @@ return 0;
 //		Setups passed file descriptor for no echo and nonblocking input
 // Parameters - int <file descriptor to modify>
 // Returns - (-1) for error, (0) for success 
-int Set(int inputdesc)
+// Requires the static int inputdesc for the input descriptor
+int Set()
 {
-
-
 	struct termios info;
 	if(tcgetattr(inputdesc, &info ) == -1)
 	{ return -1; }
@@ -98,9 +100,7 @@ int Set(int inputdesc)
 	
 	if(tcsetattr (inputdesc, TCSANOW, &info) == -1)
 	{ return -1; }
-	
-   	fcntl(inputdesc, F_SETFL, O_NONBLOCK);
-   	   
+	 
     return 0;
 }
 
@@ -108,7 +108,8 @@ int Set(int inputdesc)
 //		Setups passed file descriptor to reactivate echo and blocking input
 // Parameters - int <file descriptor to modify>
 // Returns - (-1) for error, (0) for success 
-int Reset(int inputdesc)
+// Requires the static int inputdesc for the input descriptor
+int Reset()
 {
 	struct termios info;
 	if(tcgetattr(inputdesc, &info) == -1)
@@ -119,9 +120,6 @@ int Reset(int inputdesc)
 	
 	if(tcsetattr(inputdesc, TCSANOW, &info) == -1)
 	{ return -1; }
-	
-   	fcntl(inputdesc, F_SETFL, O_NONBLOCK);
-	
 
 	return 0;
 }
