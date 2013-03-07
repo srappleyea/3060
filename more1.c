@@ -58,7 +58,7 @@ int main(int argc, char* argv[])
 			else
 				printf("Invalid command given");
 
-			printf(argv[1]);
+			printf("%s", argv[1]);
 			printf(": %.2f%% of the file is displayed.\n", (ftell(fp) / size) * 100);
 			user_input = getc(stdin);
 		}
@@ -87,15 +87,20 @@ return 0;
 // Returns - (-1) for error, (0) for success 
 int Set(int inputdesc)
 {
+
+
 	struct termios info;
 	if(tcgetattr(inputdesc, &info ) == -1)
 	{ return -1; }
 	
 	info.c_lflag &= ~ECHO;
+	info.c_lflag &= ~ICANON;
 	
 	if(tcsetattr (inputdesc, TCSANOW, &info) == -1)
 	{ return -1; }
-      
+	
+   	fcntl(inputdesc, F_SETFL, O_NONBLOCK);
+   	   
     return 0;
 }
 
@@ -110,9 +115,13 @@ int Reset(int inputdesc)
 	{ return -1; }
 	
 	info.c_lflag |= ECHO;
+	info.c_lflag |= ICANON;
 	
 	if(tcsetattr(inputdesc, TCSANOW, &info) == -1)
 	{ return -1; }
 	
+   	fcntl(inputdesc, F_SETFL, O_NONBLOCK);
+	
+
 	return 0;
 }
