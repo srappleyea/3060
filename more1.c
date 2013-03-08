@@ -9,7 +9,7 @@
 #define BUFFER_SIZE (100)
 #define LINE_DISPLAY (23)
 
-void sigint_fnc(const struct termios);
+int sigint_fnc();
 int Set();
 int Reset();
 int reply(){
@@ -41,8 +41,6 @@ int main(int argc, char* argv[])
 	inputdesc = open("/dev/tty", O_RDONLY); // Setting descriptor to the terminal
 	input = fdopen(inputdesc, "r"); // Setting filepointer to the descriptor
 	// Use input as you would any other file to get input chars
-	
-	struct termios term1;
 
 	int user_input = 1;
 	char file_contents[BUFFER_SIZE];
@@ -51,10 +49,7 @@ int main(int argc, char* argv[])
 	int bytes;
 	FILE* fp;
 
-	if (tcgetattr(STDIN_FILENO, &term1) != 0)
-    	perror("tcgetattr() error");
-
-	signal(SIGINT, sigint_fnc(term1));
+	signal(SIGINT, sigint_fnc);
 
 	if(argc > 1){
 		fp = fopen(argv[1], "r");
@@ -123,11 +118,11 @@ int main(int argc, char* argv[])
 return 0;
 }
 
-void sigint_fnc(term1){
-	if (tcsetattr(STDIN_FILENO, TCSADRAIN, &term1) != 0)
-    	perror("tcsetattr() error");
+int sigint_fnc(){
 	printf("terminal settings have been restored and the program is terminating");
+	Reset();
 	exit(-1);
+	return -1;
 }
 
 // Function Set
