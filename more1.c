@@ -10,6 +10,24 @@
 
 int Set();
 int Reset();
+int reply(){
+	int c;
+	printf("\033[7m Waiting for command: \033[m");
+
+	while((c = getchar()) != EOF){
+		if(c == 'q')
+			return 0;
+
+		if(c == ' ')
+			return 1;
+
+		if(c == '\n')
+			return 2;
+	}
+
+	return 0;
+}
+
 
 static int inputdesc;
 
@@ -21,17 +39,17 @@ int main(int argc, char* argv[])
 	inputdesc = open("/dev/tty", O_RDONLY); // Setting descriptor to the terminal
 	input = fdopen(inputdesc, "r"); // Setting filepointer to the descriptor
 	// Use input as you would any other file to get input chars
-
-
-	char user_input = ' ';
+	
+	int user_input = 1;
 	char file_contents[BUFFER_SIZE];
 	int line_counter = 0;
+	int show_file_name = 1;
+	int bytes;
 	FILE* fp;
 
 	if(argc > 1){
 		fp = fopen(argv[1], "r");
-
-	Set();
+		Set();
 
 		if(!fp){
 			perror("There was a problem opening the file.\n");
@@ -42,28 +60,39 @@ int main(int argc, char* argv[])
 		double size = ftell(fp);
 		fseek(fp, 0, SEEK_SET);
 
-		while(!feof(fp) && user_input != 'q'){
+		while(!feof(fp) && user_input != 0){
 			line_counter = 0;
-
-			if(user_input == ' '){
-				while(line_counter < 23 && !feof(fp)){
-					if(fgets(file_contents, BUFFER_SIZE, fp)){
-						printf("%s", file_contents);
-						++line_counter;
-					}
+			
+			//read the 23 lines from the file if space bar was hit
+			if(user_input == 1){
+				while(line_counter < LINE_DISPLAY && fgets(file_contents, BUFFER_SIZE, fp)){
+					printf("%s", file_contents);
+					++line_counter;
 				}
 			}
 
-			else if(user_input == '\n')
+			//read only one line from the file "Enter" was hit
+			else if(user_input == 2)
 				if(fgets(file_contents, BUFFER_SIZE, fp))
 					printf("%s", file_contents);
 
-			else
-				printf("Invalid command given");
+			else{
+				printf("Invalid command given!\n");
+				continue;
+			}
+			
+			//the title of the file is to only named once so show it once then set the flag to not show
+			//it again
+			if(show_file_name == 1){
+				printf("%s: ", argv[1]);
+				show_file_name = 0;
+			}
 
-			printf("%s", argv[1]);
-			printf(": %.2f%% of the file is displayed.\n", (ftell(fp) / size) * 100);
-			user_input = getc(stdin);
+			//displaying the percentage of the file that has been currently displayed on the console
+			printf("%.2f%% of the file is displayed.\n", (ftell(fp) / size) * 100);
+
+			//wait for user input and use reverse video
+			user_input = reply();
 		}
 	}
 
@@ -72,12 +101,13 @@ int main(int argc, char* argv[])
 		printf("Copy stdin to stdout...\n");
 		fp = stdin;
 
-		while(!feof(fp)){
-			if(fgets(file_contents, BUFFER_SIZE, fp)){
-				printf("%s", file_contents);
-				++line_counter;
-			}
+		while(fgets(file_contents, BUFFER_SIZE, fp)){
+			printf("%s", file_contents);
+			break;
 		}
+
+		for(bytes = 0; file_contents[bytes] != NULL; ++bytes);
+		printf("bytes: %d\n", bytes);
 	}
 
 	Reset();
