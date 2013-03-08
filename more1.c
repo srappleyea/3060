@@ -25,7 +25,8 @@ int reply(){
 		if(c == '\n')
 			return 2;
 	}
-
+	
+	printf("\n");
 	return 0;
 }
 
@@ -108,7 +109,7 @@ int main(int argc, char* argv[])
 		}
 
 		for(bytes = 0; file_contents[bytes] != NULL; ++bytes);
-		printf("bytes: %d\n", bytes);
+		printf("bytes: %i\n", bytes);
 	}
 
 	Reset();
