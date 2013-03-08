@@ -9,6 +9,7 @@
 #define BUFFER_SIZE (100)
 #define LINE_DISPLAY (23)
 
+int sigint_fnc();
 int Set();
 int Reset();
 int reply(){
@@ -29,7 +30,6 @@ int reply(){
 	return 0;
 }
 
-
 static int inputdesc;
 
 int main(int argc, char* argv[])
@@ -40,13 +40,15 @@ int main(int argc, char* argv[])
 	inputdesc = open("/dev/tty", O_RDONLY); // Setting descriptor to the terminal
 	input = fdopen(inputdesc, "r"); // Setting filepointer to the descriptor
 	// Use input as you would any other file to get input chars
-	
+
 	int user_input = 1;
 	char file_contents[BUFFER_SIZE];
 	int line_counter = 0;
 	int show_file_name = 1;
 	int bytes;
 	FILE* fp;
+
+	signal(SIGINT, sigint_fnc);
 
 	if(argc > 1){
 		fp = fopen(argv[1], "r");
@@ -114,6 +116,13 @@ int main(int argc, char* argv[])
 
 	Reset();
 return 0;
+}
+
+int sigint_fnc(){
+	printf("terminal settings have been restored and the program is terminating");
+	Reset();
+	exit(-1);
+	return -1;
 }
 
 // Function Set
