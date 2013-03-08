@@ -13,7 +13,7 @@ int Set();
 int Reset();
 int reply(){
 	int c;
-	printf("\033[7m Waiting for command: \033[m");
+	printf("\033[7m Waiting for command:\n \033[m");
 
 	while((c = getchar()) != EOF){
 		if(c == 'q')
@@ -26,7 +26,6 @@ int reply(){
 			return 2;
 	}
 	
-	printf("\n");
 	return 0;
 }
 
@@ -51,12 +50,13 @@ int main(int argc, char* argv[])
 
 	if(argc > 1){
 		fp = fopen(argv[1], "r");
-		Set();
 
 		if(!fp){
 			perror("There was a problem opening the file.\n");
 			exit(-1);
 		}
+
+		Set();
 
 		fseek(fp, 0, SEEK_END);
 		double size = ftell(fp);
