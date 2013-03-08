@@ -119,7 +119,7 @@ return 0;
 }
 
 int sigint_fnc(){
-	printf("terminal settings have been restored and the program is terminating");
+	printf("terminal settings have been restored and the program is terminating\n");
 	Reset();
 	exit(-1);
 	return -1;
