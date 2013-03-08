@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #define BUFFER_SIZE (100)
+#define LINE_DISPLAY (23)
 
 int Set();
 int Reset();
