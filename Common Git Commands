@@ -1,0 +1,23 @@
+Hopefully I'm not stearing anyone astray with this.  But here are some of the commands that I used frequently on this project and what they do.  Feel free to add stuff to this as you figure out cool new things and if I made a mistake fix it please.
+
+git clone <repo name> <folder>  // use this to get started, it'll copy everything from the server and put it into the folder of your choice getting you started
+
+git branch // useful to see what branches you have locally
+
+git branch <new branch name> // used to make a new branch locally
+
+git branch -d <branch name> // deletes that branch locally
+
+git checkout <branch name> // changes you to that branch
+
+git pull origin // updates your local files with what's on ther server.  I don't know if this is just for the branch you're working in or for everything
+
+git add <filename> // you need to do this before every commit
+
+git commit // updates your current branch with your changes, need to add files before this and do this before a push to the server
+
+git push origin <branch name> // used to push a branch onto the server, if it's master, that's the main thing, if it's another branch that you made locally, it'll create that new branch on the server
+
+git merge <branch name> // I used this only from master, It'll merge your current branch with the branch you type in.  I don't know if you need to push / commit after this
+
+
