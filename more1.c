@@ -9,6 +9,7 @@
 #define BUFFER_SIZE (100)
 #define LINE_DISPLAY (23)
 
+void sigint_fnc(const struct termios);
 int Set();
 int Reset();
 int reply(){
@@ -30,7 +31,6 @@ int reply(){
 	return 0;
 }
 
-
 static int inputdesc;
 
 int main(int argc, char* argv[])
@@ -42,12 +42,19 @@ int main(int argc, char* argv[])
 	input = fdopen(inputdesc, "r"); // Setting filepointer to the descriptor
 	// Use input as you would any other file to get input chars
 	
+	struct termios term1;
+
 	int user_input = 1;
 	char file_contents[BUFFER_SIZE];
 	int line_counter = 0;
 	int show_file_name = 1;
 	int bytes;
 	FILE* fp;
+
+	if (tcgetattr(STDIN_FILENO, &term1) != 0)
+    	perror("tcgetattr() error");
+
+	signal(SIGINT, sigint_fnc(term1));
 
 	if(argc > 1){
 		fp = fopen(argv[1], "r");
@@ -114,6 +121,13 @@ int main(int argc, char* argv[])
 
 	Reset();
 return 0;
+}
+
+void sigint_fnc(term1){
+	if (tcsetattr(STDIN_FILENO, TCSADRAIN, &term1) != 0)
+    	perror("tcsetattr() error");
+	printf("terminal settings have been restored and the program is terminating");
+	exit(-1);
 }
 
 // Function Set
